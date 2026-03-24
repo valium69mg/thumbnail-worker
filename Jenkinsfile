@@ -1,11 +1,5 @@
 pipeline {
-    
-    agent {
-        docker {
-            image 'golang:1.25.7'
-            args '-v /go/pkg/mod:/go/pkg/mod'
-        }
-    }
+    agent none
 
     environment {
         SONARQUBE = 'SonarQube'
@@ -18,18 +12,14 @@ pipeline {
     stages {
 
         stage('Verify Go') {
+            agent { docker { image 'golang:1.23.7' } }
             steps {
                 sh 'go version'
             }
         }
-        stage('Checkout') {
-            steps {
-                git branch: 'dev',
-                    url: 'https://github.com/valium69mg/thumbnail-worker'
-            }
-        }
 
         stage('Build') {
+            agent { docker { image 'golang:1.23.7' } }
             steps {
                 sh 'go mod download'
                 sh 'go build -o app .'
@@ -37,12 +27,14 @@ pipeline {
         }
 
         stage('Test') {
+            agent { docker { image 'golang:1.23.7' } }
             steps {
                 sh 'go test ./... -coverprofile=coverage.out'
             }
         }
 
         stage('SonarQube Analysis') {
+            agent any
             steps {
                 withSonarQubeEnv('SonarQube') {
                     script {
@@ -57,6 +49,7 @@ pipeline {
         }
 
         stage('Quality Gate') {
+            agent any
             steps {
                 timeout(time: 2, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
