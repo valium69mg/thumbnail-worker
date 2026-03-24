@@ -29,7 +29,9 @@ pipeline {
         stage('Test') {
             agent { docker { image 'golang:1.25.7' } }
             steps {
-                sh 'go test ./... -coverprofile=coverage.out'
+                sh 'go mod download'
+                sh 'go test ./... -v -coverprofile=coverage.out -covermode=atomic'
+                sh 'go tool cover -func=coverage.out' 
             }
         }
 
