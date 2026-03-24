@@ -12,14 +12,14 @@ pipeline {
     stages {
 
         stage('Verify Go') {
-            agent { docker { image 'golang:1.23.7' } }
+            agent { docker { image 'golang:1.25.7' } }
             steps {
                 sh 'go version'
             }
         }
 
         stage('Build') {
-            agent { docker { image 'golang:1.23.7' } }
+            agent { docker { image 'golang:1.25.7' } }
             steps {
                 sh 'go mod download'
                 sh 'go build -o app .'
@@ -27,7 +27,7 @@ pipeline {
         }
 
         stage('Test') {
-            agent { docker { image 'golang:1.23.7' } }
+            agent { docker { image 'golang:1.25.7' } }
             steps {
                 sh 'go test ./... -coverprofile=coverage.out'
             }
