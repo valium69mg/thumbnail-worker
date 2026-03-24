@@ -1,19 +1,19 @@
 pipeline {
     agent any
 
+    environment {
+        SONARQUBE = 'SonarQube'
+    }
+
     triggers {
         pollSCM('H/5 * * * *')
     }
 
-    tools {
-        go 'go-1.22'
-    }
-
     stages {
-
         stage('Checkout') {
             steps {
-                git 'https://github.com/valium69mg/thumbnail-worker'
+                git branch: 'dev',
+                    url: 'https://github.com/valium69mg/thumbnail-worker'
             }
         }
 
@@ -31,18 +31,9 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
-            environment {
-                SCANNER_HOME = tool 'sonarqube-scanner'
-            }
             steps {
-                withSonarQubeEnv('sonarqube-server') {
-                    sh '''
-                    $SCANNER_HOME/bin/sonar-scanner \
-                      -Dsonar.projectKey=thumbnail-worker \
-                      -Dsonar.projectName=thumbnail-worker \
-                      -Dsonar.sources=. \
-                      -Dsonar.go.coverage.reportPaths=coverage.out
-                    '''
+                withSonarQubeEnv('SonarQube') {
+                    sh 'sonar-scanner -Dsonar.projectKey=thumbnail-worker -Dsonar.sources=. -Dsonar.go.coverage.reportPaths=coverage.out'
                 }
             }
         }
