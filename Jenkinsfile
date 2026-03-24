@@ -1,6 +1,11 @@
 pipeline {
     
-    agent any
+    agent {
+        docker {
+            image 'golang:1.25.7'
+            args '-v /go/pkg/mod:/go/pkg/mod'
+        }
+    }
 
     environment {
         SONARQUBE = 'SonarQube'
