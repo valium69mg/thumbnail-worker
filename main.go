@@ -1,7 +1,14 @@
 package main
 
-import "thumbnail-worker/worker"
+import (
+	"thumbnail-worker/health"
+	"thumbnail-worker/worker"
+)
 
 func main() {
-	worker.StartWorker()
+	go worker.StartWorker()
+
+	go health.RegisterHealthCheck()
+
+	select {}
 }
