@@ -21,8 +21,10 @@ WORKDIR /app
 # Copy binary
 COPY --from=builder /app/thumbnail-worker .
 
-# Install CA certificates (needed if you fetch via HTTP later)
-RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN apt-get update \
+    && apt-get install -y ca-certificates curl \
+    && rm -rf /var/lib/apt/lists/*
+
 
 # Run worker
 CMD ["./thumbnail-worker"]
