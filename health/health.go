@@ -6,7 +6,7 @@ import (
 )
 
 func RegisterHealthCheck() {
-	port := "8080"
+	port := "8081"
 	log.Printf("Starting healthcheck on [::]:%s/healthz", port)
 	http.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
