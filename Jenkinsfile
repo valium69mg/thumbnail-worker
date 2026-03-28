@@ -47,14 +47,16 @@ pipeline {
                 SONAR_LOGIN    = credentials('sonar-token')
             }
             steps {
-                sh '''
-                    sonar-scanner \
-                    -Dsonar.projectKey=thumbnail-worker \
-                    -Dsonar.sources=. \
-                    -Dsonar.go.coverage.reportPaths=coverage.out \
-                    -Dsonar.host.url=$SONAR_HOST_URL \
-                    -Dsonar.login=$SONAR_LOGIN
-                '''
+                withSonarQubeEnv('SonarQube') {
+                    sh '''
+                        sonar-scanner \
+                        -Dsonar.projectKey=thumbnail-worker \
+                        -Dsonar.sources=. \
+                        -Dsonar.go.coverage.reportPaths=coverage.out \
+                        -Dsonar.host.url=$SONAR_HOST_URL \
+                        -Dsonar.login=$SONAR_LOGIN
+                    '''
+                }
             }
         }
 
