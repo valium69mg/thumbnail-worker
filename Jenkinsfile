@@ -73,14 +73,14 @@ pipeline {
             agent any
             steps {
                 echo 'Building Docker image...'
-                sh "docker build -t $DOCKER_IMAGE:latest ."
+                sh "docker build -t carlostranquilinocr98/single-vendor-ecommerce-thumbnail-worker:latest ."
 
                 echo 'Pushing Docker image to Docker Hub...'
                 withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials',
                                                   usernameVariable: 'DOCKER_USER',
                                                   passwordVariable: 'DOCKER_PASS')]) {
                     sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
-                    sh "docker push $DOCKER_IMAGE:latest"
+                    sh "docker push carlostranquilinocr98/single-vendor-ecommerce-thumbnail-worker:latest"
                 }
             }
         }
