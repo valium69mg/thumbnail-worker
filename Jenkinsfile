@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         SONARQUBE = 'SonarQube'
+        DOCKER_IMAGE = 'carlostranquilinocr98/single-vendor-ecommerce-thumbnail-worker'
     }
 
     triggers {
@@ -10,7 +11,6 @@ pipeline {
     }
 
     stages {
-
         stage('Verify Go') {
             agent { docker { image 'golang:1.25.7' } }
             steps {
@@ -31,15 +31,15 @@ pipeline {
             steps {
                 sh 'go mod download'
                 sh 'go test ./... -v -coverprofile=coverage.out -covermode=atomic'
-                sh 'go tool cover -func=coverage.out' 
+                sh 'go tool cover -func=coverage.out'
             }
         }
 
         stage('SonarQube Analysis') {
             agent {
                 docker {
-                image 'sonarsource/sonar-scanner-cli:latest'
-                args '--network=jenkins_default -u 0:0'
+                    image 'sonarsource/sonar-scanner-cli:latest'
+                    args '--network=jenkins_default -u 0:0'
                 }
             }
             environment {
@@ -48,24 +48,47 @@ pipeline {
             }
             steps {
                 sh '''
-                sonar-scanner \
-                -Dsonar.projectKey=thumbnail-worker \
-                -Dsonar.sources=. \
-                -Dsonar.go.coverage.reportPaths=coverage.out \
-                -Dsonar.host.url=$SONAR_HOST_URL \
-                -Dsonar.login=$SONAR_LOGIN
+                    sonar-scanner \
+                    -Dsonar.projectKey=thumbnail-worker \
+                    -Dsonar.sources=. \
+                    -Dsonar.go.coverage.reportPaths=coverage.out \
+                    -Dsonar.host.url=$SONAR_HOST_URL \
+                    -Dsonar.login=$SONAR_LOGIN
                 '''
             }
         }
-                    
+
+        stage('Wait for SonarQube Quality Gate') {
+            steps {
+                echo 'Waiting for SonarQube Quality Gate...'
+                timeout(time: 10, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
+        stage('Build & Push Docker Image') {
+            steps {
+                echo 'Building Docker image...'
+                sh "docker build -t $DOCKER_IMAGE:latest ."
+
+                echo 'Pushing Docker image to Docker Hub...'
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-credentials',
+                                                  usernameVariable: 'DOCKER_USER',
+                                                  passwordVariable: 'DOCKER_PASS')]) {
+                    sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
+                    sh "docker push $DOCKER_IMAGE:latest"
+                }
+            }
+        }
     }
 
     post {
         success {
-            echo '✅ Build, tests, and SonarQube analysis succeeded!'
+            echo '✅ Build, tests, SonarQube analysis, quality gate, and Docker push succeeded!'
         }
         failure {
-            echo '❌ Build, tests, or SonarQube analysis failed!'
+            echo '❌ Build, tests, SonarQube analysis, quality gate, or Docker push failed!'
         }
     }
 }
