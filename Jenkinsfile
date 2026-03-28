@@ -70,6 +70,7 @@ pipeline {
         }
 
         stage('Build & Push Docker Image') {
+            agent any
             steps {
                 echo 'Building Docker image...'
                 sh "docker build -t $DOCKER_IMAGE:latest ."
