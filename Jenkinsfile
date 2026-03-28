@@ -39,7 +39,7 @@ pipeline {
             agent {
                 docker {
                     image 'sonarsource/sonar-scanner-cli:latest'
-                    args '-u 0:0' '--network=host'
+                    args '-u 0:0 --network=host'
                 }
             }
             environment {
