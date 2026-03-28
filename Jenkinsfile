@@ -36,29 +36,29 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
-            agent {
-                docker {
-                    image 'sonarsource/sonar-scanner-cli:latest'
-                    args '-u 0:0 --network=host'
-                }
-            }
-            environment {
-                SONAR_HOST_URL = 'http://sonarqube:9000'
-                SONAR_LOGIN    = credentials('sonar-token')
-            }
-            steps {
-                echo 'Running SonarQube analysis...'
-                sh '''
-                    sonar-scanner \
-                    -Dsonar.projectKey=thumbnail-worker \
-                    -Dsonar.sources=. \
-                    -Dsonar.go.coverage.reportPaths=coverage.out \
-                    -Dsonar.host.url=$SONAR_HOST_URL \
-                    -Dsonar.login=$SONAR_LOGIN
-                '''
+        agent {
+            docker {
+                image 'sonarsource/sonar-scanner-cli:latest'
+                args '-u 0:0'
             }
         }
-                
+        environment {
+            SONAR_HOST_URL = 'http://sonarqube:9000'
+            SONAR_LOGIN    = credentials('sonar-token')
+        }
+        steps {
+            echo 'Running SonarQube analysis...'
+            sh '''
+                sonar-scanner \
+                -Dsonar.projectKey=thumbnail-worker \
+                -Dsonar.sources=. \
+                -Dsonar.go.coverage.reportPaths=coverage.out \
+                -Dsonar.host.url=$SONAR_HOST_URL \
+                -Dsonar.login=$SONAR_LOGIN
+            '''
+        }
+    }
+                    
     }
 
     post {
