@@ -6,6 +6,7 @@ import (
 	"image/png"
 	"os"
 	"path/filepath"
+	"strconv"
 	"testing"
 )
 
@@ -51,7 +52,7 @@ func TestProcessJobValidImage(t *testing.T) {
 
 	// Verificar que se crearon los thumbnails
 	for _, size := range job.Sizes {
-		expected := filepath.Join(tmpDir, "categories", "uuid_"+string(rune(size))+".png")
+		expected := filepath.Join(tmpDir, "categories", "uuid_"+strconv.Itoa(size)+".png")
 		if _, err := os.Stat(expected); os.IsNotExist(err) {
 			t.Errorf("expected thumbnail not found: %s", expected)
 		}
